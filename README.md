@@ -19,7 +19,7 @@
             Hits are saved to: "hits.txt", stats are shown in window title.<br>
             The amount of IPs being is picked from a range 666 up to 66666.
         </p>
-        <h4>Like it? So, ...</h4>
+        <h3>Like it? So, ...</h3>
         <p>
             If you like this tiny tool, buy me a coffee or donate!<br><br>
             <b>
@@ -32,3 +32,8 @@
             Best wishes,<br>
             DrPython3
         </p>
+<h4>Final notes ...</h4>
+<p>
+            I have <b>not tested</b> the code very often - as said above,<br>
+            this is a quick release just because of a boring day!
+</p>
