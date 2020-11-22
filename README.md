@@ -17,7 +17,7 @@
         </p>
         <p>
             Hits are saved to: "hits.txt", stats are shown in window title.<br>
-            The amount of IPs being is picked from a range 666 up to 66666.
+            The amount of IPs being is picked from a range 666 up to 6666.
         </p>
         <h3>Like it? So, ...</h3>
         <p>
