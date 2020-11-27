@@ -1,6 +1,6 @@
 # LuckySSH
 <p>
-            <i>A Little Bruteforce Lool for Pentester's Lucky Days targeting SSH-Services!</i>
+            <i>A Little Bruteforce Tool for Pentester's Lucky Days targeting SSH-Services!</i>
         </p>
         <h2>Legal Notices</h2>
         <p>
